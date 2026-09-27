@@ -1,6 +1,7 @@
 @import "tailwindcss";
+@import "./styles/theme.css";
 
-/* The supplied font is a static Regular face, not a variable font. */
+/* The supplied font is Regular. Other weights currently use browser synthesis. */
 @font-face {
   font-family: "Red Hat Display";
   src: url("./assets/fonts/red-hat.display.otf") format("opentype");
@@ -9,17 +10,37 @@
   font-display: swap;
 }
 
-@theme {
-  --font-sans: "Red Hat Display", ui-sans-serif, system-ui, sans-serif;
-}
-
 @layer base {
   body {
-    margin: 0;
-    min-width: 320px;
-    background: #ffffff;
-    color: #1e1e1b;
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
+    @apply m-0 min-w-80 bg-background font-sans text-text antialiased;
+  }
+
+  button, input, select, textarea {
+    font: inherit;
+  }
+
+  button:not(:disabled), summary {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--text);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background: var(--action);
+    color: var(--on-action);
+  }
+}
+
+@layer components {
+  .form-control {
+    @apply min-h-12 w-full min-w-0 rounded-sm border border-control-border bg-background px-3 py-3 text-sm text-text placeholder:text-muted;
+    @apply disabled:cursor-not-allowed disabled:bg-surface disabled:text-muted;
+  }
+
+  .form-control[aria-invalid="true"] {
+    @apply border-error;
   }
 }

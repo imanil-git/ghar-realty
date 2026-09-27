@@ -1,0 +1,46 @@
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --surface: #f5f5f3;
+  --text: #1e1e1b;
+  --muted: #62625e;
+  --border: #cccccc;
+  --control-border: #8c8c8c;
+  --action: #1e1e1b;
+  --on-action: #ffffff;
+  --error: #b42318;
+  --error-surface: #fff1f0;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --background: #1e1e1b;
+  --surface: #292926;
+  --text: #ffffff;
+  --muted: #b7b7b0;
+  --border: #494945;
+  --control-border: #8c8c8c;
+  --action: #ffffff;
+  --on-action: #1e1e1b;
+  --error: #ffb4ab;
+  --error-surface: #3f2724;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-control-border: var(--control-border);
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-error: var(--error);
+  --color-error-surface: var(--error-surface);
+}
+
+@theme {
+  --font-sans: "Red Hat Display", ui-sans-serif, system-ui, sans-serif;
+}
