@@ -1,115 +1,116 @@
 # Ghar Realty
 
-React + JavaScript frontend for browsing and managing real-estate listings.
+A React + JavaScript real-estate frontend with light/dark themes, browsing, saved
+homes, accounts, and a continuous create/edit listing form. The default backend
+is a local demo adapter; no real properties or emails are published.
 
-## Run locally
+## Start
 
-Use Node.js 24 LTS and npm. Dependencies are locked in `package-lock.json`.
+Use Node.js 24 LTS and npm.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite.
+Open the address printed by Vite. No environment file is required for demo mode.
+Copy `.env.example` to `.env.local` when changing public configuration.
+
+Demo login:
+
+- Email: `aarav@example.com`
+- Password: `GharDemo123!`
+
+Use fictional details in this demonstration. Your browser stores sample listings,
+profiles, favorites, and salted password verifiers, never plaintext passwords.
+This is not production authentication: someone with browser access can modify the
+local database. Sessions are tab-scoped and expire after eight hours. Clear the
+`ghar-demo-v2` and `ghar-session` storage entries to reset the demo.
+
+## What is implemented
+
+- Editorial monochrome styling with the supplied Red Hat Display font.
+- Persistent theme, custom accessible controls, mobile navigation, shared layout.
+- Home, category and search pages; URL filters, sorting and pagination.
+- Detail gallery, phone action, share link, location link and related properties.
+- Signup, login/logout, password reset/change and profile/avatar editing.
+- Favorites and responsive listing management with search, sort, edit and delete.
+- One continuous listing form shared by create and edit: overview, address,
+  photos/video, local area units, roads, parking, rooms, amenities, landmarks,
+  pricing, description, contact, policy, review, drafts and publication.
+- Image selection/drop, processing feedback, retry, cover selection, reorder and
+  remove. Demo images are resized before browser storage. Animated uploads use
+  their first frame. Storage-quota errors preserve the form.
+- Drafts allow missing publishing details; publication validates required fields.
+- Session/ownership checks in the demo adapter; unsaved-change prompts.
+- Loading/error/empty states, route errors and not-found page.
+
+Your Lucide theme-toggle customization is preserved. Only a Regular font file
+was supplied, so bold headings currently use browser-synthesized weight. Add real
+font weight files later if desired.
+
+## Replace sample photos
+
+Replace files in `public/images/` or update the image paths in
+`src/mocks/data/properties.js`. Images are illustrative architectural photographs,
+not verified images of the Nepal sample listings. The seed is copied to browser
+storage on first use; reset the demo database after changing seed records.
+
+## State and folder conventions
+
+- `app/`: router, provider and QueryClient.
+- `components/ui/`: reusable controls without property logic.
+- `components/layout/`: site/account shells, header, navigation and footer.
+- `features/`: domain APIs, hooks, schemas and components.
+- `pages/`: page composition; API requests stay in feature modules.
+- `services/`: HTTP configuration/client and uploads.
+- `mocks/`: fixtures and browser-backed API implementations.
+- `store/uiStore.js`: theme only; no duplicated auth/filter stores.
+- `styles/theme.css`: semantic color roles for both themes.
+
+TanStack Query owns server/session state; the URL owns applied search filters;
+React Hook Form owns forms; component state owns temporary controls. Feature API
+functions select the mock or HTTP adapter without changing page code.
+
+`/design/components` keeps the reusable component preview available.
+Descriptions support basic Markdown; raw HTML is never injected.
+
+## Checks
 
 ```sh
 npm run lint
+npm test
 npm run build
-npm run preview
+npx playwright install chromium
+npm run test:e2e
 ```
 
-## Phase 1 — project setup
+Vitest covers schemas, search, mock session/ownership rules and controls.
+Playwright covers browsing, responsive widths, theme persistence, protected
+routes, favorites and the draft/edit/publish/delete journey. `npm run format`
+formats source and tests. Playwright reports and build output are ignored by Git.
 
-- React/Vite starter retained and missing image imports removed.
-- Tailwind CSS integrated through `@tailwindcss/vite`.
-- React Router, TanStack Query, Zustand, React Hook Form, Zod, and resolvers installed.
-- Supplied Red Hat Display Regular font retained and connected locally.
-- Feature-based folders scaffolded; `.gitkeep` files preserve empty directories.
-- `.env.example` documents future public API settings; no backend is connected yet.
-- The current page is a component preview, not the finished homepage.
+## Backend handoff and hosting
 
-Only the Regular font face was supplied. It is preserved as a static font. Headings currently use browser-synthesized bold; actual Medium/SemiBold/Bold font files can replace that later.
+See `docs/API-CONTRACT.md` for the HTTP contract and integration checklist.
+Set `VITE_API_MODE=http` and `VITE_API_BASE_URL` only after those endpoints exist.
+Frontend variables are public; never put secrets in them.
 
-## Phase approval checkpoints
+A production bundle is created in `dist/`. Netlify SPA redirects and a Vercel
+rewrite configuration are included for direct route refreshes. If your backend
+shares `/api`, configure that proxy before enabling the SPA fallback on the host.
+No deployment was performed; no hosting destination or backend was supplied.
 
-1. Project setup — complete.
-2. Theme and basic UI — complete; awaiting approval for Phase 3.
-3. Routing, shared layout, header and footer — pending.
-4. Mock API and common property model — pending.
-5. Public browsing pages — pending.
-6. Authentication and account pages — pending.
-7. Continuous add/edit property form — pending.
-8. Real backend integration and release — pending backend availability.
+## Remaining external work
 
-Stop after each phase and ask for approval before starting the next.
+The frontend and mock flows are implemented. Real API integration cannot be
+verified until a backend is available. Production launch also needs real session
+security, ownership enforcement, upload storage, email delivery, approved terms
+and privacy policy, moderation, and listing-expiration behavior. The 180-day
+listing duration is currently metadata, not a background expiry job.
 
-## Architecture
+Social login, in-app messaging, offers, site visits and interactive map/split
+views remain outside this version, as agreed in the plan.
 
-- `app/`: composition, providers, and routing.
-- `components/ui/`: reusable business-independent controls.
-- `components/layout/`: header, footer, and layout shells.
-- `features/`: domain components, API functions, hooks, and schemas.
-- `pages/`: route-level composition.
-- `services/`: shared HTTP and upload infrastructure.
-- `mocks/`: replaceable fixtures and mock API implementations.
-- `store/`: `uiStore.js` owns the shared theme preference only.
-- `styles/theme.css`: semantic light/dark colors and Tailwind theme mappings. `src/index.css` loads the font and shared control styling.
-
-State ownership: TanStack Query for API/session data, URL parameters for search,
-React Hook Form for forms, Zustand for shared UI preferences, and local React
-state for temporary controls. Do not create duplicated auth or filter stores.
-
-## Design direction
-
-Red Hat Display; editorial monochrome; light mode initially. Later phases add
-light/dark persistence, signed-out Login, signed-in listing actions, and a single
-continuous property form. Sample photography will be replaceable.
-
-## Phase 2 — theme and controls
-
-The root page temporarily renders `ComponentPreview`. It demonstrates typography,
-colors, buttons, form validation, and disabled/read-only/loading states. No example
-form data is sent or stored.
-
-- `Button`: primary, secondary, or ghost; defaults to `type="button"`; loading also disables it.
-- `Input`, `Select`, `Textarea`: visible labels, hint/error descriptions, generated or explicit IDs, native HTML props.
-- `Checkbox`: label, error/hint, required and disabled states.
-- `FormField`: label and message wrapper for future custom controls.
-- `ThemeToggle`: sun in light mode and moon in dark mode, with keyboard support and a descriptive label.
-- `Container`, `PageHeading`: consistent width, responsive gutters, and page title spacing.
-
-React 19 forwards the `ref` prop through the controls to their native elements.
-They work directly with React Hook Form's `register()` without a wrapper or controller.
-
-```jsx
-<Input
-  label="Property title"
-  required
-  error={errors.title?.message}
-  {...register('title')}
-/>
-
-<Button type="submit" loading={isSubmitting}>
-  Save property
-</Button>
-```
-
-Use semantic Tailwind classes such as `bg-background`, `bg-surface`, `text-text`,
-`text-muted`, and `border-border` rather than repeating light/dark colors in every
-component. Inputs use the stronger `border-control-border` for visible boundaries.
-
-`public/theme.js` reads `ghar-theme` before React/CSS load. The Zustand store
-updates the document and persists only the chosen theme. Invalid or unavailable
-storage falls back to light; switching still works without persistence.
-
-### Verification
-
-- `npm run lint` and `npm run build` pass.
-- Browser: light → dark → reload retains dark; keyboard activation returns to light.
-- Empty form: four errors and focus on the title field.
-- Completed form: success feedback, no save or network request.
-- Mobile/tablet/desktop width checks: no horizontal document overflow.
-- Loading/disabled controls are disabled; the browser console has no warnings or errors.
-
-The header, footer, authentication and real property form belong to later phases.
+The previous phase approval checkpoints were removed at your request; work now
+continues through all remaining phases without asking between them.

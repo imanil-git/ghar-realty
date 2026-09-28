@@ -1,16 +1,16 @@
 const variants = {
-  primary: 'border-action bg-action text-on-action hover:opacity-85',
-  secondary: 'border-control-border bg-background text-text hover:bg-surface',
-  ghost: 'border-transparent bg-transparent text-text hover:bg-surface',
-}
+  primary: "border-action bg-action text-on-action hover:opacity-85",
+  secondary: "border-control-border bg-background text-text hover:bg-surface",
+  ghost: "border-transparent bg-transparent text-text hover:bg-surface",
+};
 
 export default function Button({
   children,
-  variant = 'primary',
+  variant = "primary",
   loading = false,
   disabled = false,
-  type = 'button',
-  className = '',
+  type = "button",
+  className = "",
   ...props
 }) {
   return (
@@ -29,5 +29,5 @@ export default function Button({
       )}
       {children}
     </button>
-  )
+  );
 }
