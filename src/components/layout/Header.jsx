@@ -9,6 +9,7 @@ import Icon from "../ui/Icon";
 
 export default function Header({ user = null, loading = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [failedAvatar, setFailedAvatar] = useState(null);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   const location = useLocation();
 
@@ -55,7 +56,17 @@ export default function Header({ user = null, loading = false }) {
               aria-label={`Account for ${user.name}`}
               className="flex min-h-12 max-w-20 flex-col items-center justify-center gap-1 px-1"
             >
-              <Icon name="user" className="size-5" />
+              {user.avatar && user.avatar !== failedAvatar ? (
+                <img
+                  src={user.avatar}
+                  alt={`${user.name}'s profile photo`}
+                  className="size-5 shrink-0 rounded-full object-cover"
+                  onError={() => setFailedAvatar(user.avatar)}
+                />
+              ) : (
+                <Icon name="user" className="size-5" />
+              )}
+
               <span className="max-w-16 truncate text-xs">
                 {user.name.split(" ")[0]}
               </span>

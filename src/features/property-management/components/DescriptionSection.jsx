@@ -1,10 +1,8 @@
 import { useRef } from "react";
 import { useFormContext } from "react-hook-form";
-import { Link } from "react-router";
 import FormSection from "./FormSection";
 import { FormInput } from "./FormControls";
 import Textarea from "../../../components/ui/Textarea";
-import Checkbox from "../../../components/ui/Checkbox";
 import Button from "../../../components/ui/Button";
 
 export default function DescriptionSection() {
@@ -85,20 +83,6 @@ export default function DescriptionSection() {
           }}
         />
       </div>
-      <Checkbox
-        label={
-          <>
-            I agree to the{" "}
-            <Link to="/terms" target="_blank" className="underline">
-              listing policy
-            </Link>
-          </>
-        }
-        required
-        error={errors.policy?.message}
-        {...register("policy")}
-      />
-      <p className="text-sm text-muted">Listing duration: 180 days</p>
     </FormSection>
   );
 }

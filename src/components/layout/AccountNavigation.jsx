@@ -16,7 +16,7 @@ export default function AccountNavigation() {
           end={to.endsWith("/properties") ? false : true}
           to={to}
           className={({ isActive }) =>
-            `inline-flex min-h-12 items-center rounded-sm px-4 py-3 text-sm ${isActive ? "bg-action text-on-action" : "bg-surface hover:underline"}`
+            `inline-flex min-h-12 items-center justify-center border border-border rounded-sm px-4 py-3 text-sm ${isActive ? "bg-action text-on-action" : "bg-background hover:bg-surface"}`
           }
         >
           {label}
@@ -33,7 +33,7 @@ export default function AccountNavigation() {
             /* Display the failure below. */
           }
         }}
-        className="min-h-12 px-4 py-3 text-left text-sm text-muted disabled:opacity-50"
+        className="min-h-12 border border-border rounded-sm px-4 py-3 text-center text-sm disabled:opacity-50"
       >
         {logout.isPending ? "Logging out…" : "Log out"}
       </button>

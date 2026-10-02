@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { useSession } from "../../auth/hooks/useSession";
 import { useFavorites, useToggleFavorite } from "../hooks/useFavorites";
 
-export default function FavoriteButton({ propertyId }) {
+export default function FavoriteButton({ propertyId, showLabel = false }) {
   const session = useSession();
   const favorites = useFavorites(session.data?.id);
   const mutation = useToggleFavorite();
@@ -27,9 +27,17 @@ export default function FavoriteButton({ propertyId }) {
         disabled={mutation.isPending || session.isPending}
         aria-label={saved ? "Remove from saved homes" : "Save property"}
         aria-pressed={saved}
-        className="flex size-11 items-center justify-center rounded-full bg-background/95 text-text disabled:opacity-50"
+        className={
+          showLabel
+            ? "flex min-h-12 items-center justify-center gap-2 rounded-sm border border-border bg-background px-5 text-sm text-text disabled:opacity-50"
+            : "flex size-11 items-center justify-center rounded-full bg-background/95 text-text disabled:opacity-50"
+        }
       >
-        <Heart size={21} fill={saved ? "currentColor" : "none"} />
+        <Heart
+          size={showLabel ? 16 : 21}
+          fill={saved ? "currentColor" : "none"}
+        />
+        {showLabel && (saved ? "Saved" : "Save")}
       </button>
       {mutation.isError && (
         <p

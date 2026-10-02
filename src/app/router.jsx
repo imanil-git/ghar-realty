@@ -30,6 +30,8 @@ const PropertyFormPage = lazy(
 );
 const ComponentPreview = lazy(() => import("../pages/ComponentPreview"));
 const TermsPage = lazy(() => import("../pages/TermsPage"));
+const AboutPage = lazy(() => import("../pages/company/AboutPage"));
+const ContactPage = lazy(() => import("../pages/company/ContactPage"));
 
 function PageLoader() {
   return (
@@ -68,6 +70,8 @@ const router = createBrowserRouter([
             element: <AuthPage key="reset" mode="reset" />,
           },
           { path: "terms", element: <TermsPage /> },
+          { path: "about-us", element: <AboutPage /> },
+          { path: "contact-us", element: <ContactPage /> },
           { path: "design/components", element: <ComponentPreview /> },
           {
             path: "account",
@@ -82,6 +86,10 @@ const router = createBrowserRouter([
                   { path: "favorites", element: <FavoritesPage /> },
                   { path: "properties", element: <MyPropertiesPage /> },
                   { path: "properties/new", element: <PropertyFormPage /> },
+                  {
+                    path: "properties/:id/preview",
+                    element: <PropertyFormPage />,
+                  },
                   {
                     path: "properties/:id/edit",
                     element: <PropertyFormPage />,

@@ -62,6 +62,20 @@ export default function Footer() {
         </div>
         <div className="mt-10 flex flex-wrap justify-between gap-3 border-t border-border pt-6 text-xs text-muted">
           <p>© {new Date().getFullYear()} Ghar Realty</p>
+          <nav aria-label="Company" className="flex flex-wrap gap-x-6 gap-y-2">
+            <Link
+              to="/about-us"
+              className="inline-flex min-h-11 items-center hover:underline"
+            >
+              About us
+            </Link>
+            <Link
+              to="/contact-us"
+              className="inline-flex min-h-11 items-center hover:underline"
+            >
+              Contact us
+            </Link>
+          </nav>
           <p>Nepal · A place for your next chapter</p>
         </div>
       </Container>
