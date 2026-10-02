@@ -1,13 +1,19 @@
 import { useRef, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useBeforeUnload, useBlocker, useNavigate } from "react-router";
+import {
+  useBeforeUnload,
+  useBlocker,
+  useNavigate,
+  useLocation,
+  useSearchParams,
+  Link,
+} from "react-router";
 import {
   draftSchema,
   publishSchema,
   formValues,
   listingPayload,
-  measuredArea,
 } from "../schemas/propertySchema";
 import { usePropertyMutation } from "../hooks/usePropertyMutation";
 import OverviewSection from "./OverviewSection";
@@ -22,20 +28,10 @@ import FormSection from "./FormSection";
 import Button from "../../../components/ui/Button";
 import Feedback from "../../../components/ui/Feedback";
 import Modal from "../../../components/ui/Modal";
-import { formatPrice } from "../../../utils/formatPrice";
+import ListingPreview from "./ListingPreview";
+import Checkbox from "../../../components/ui/Checkbox";
 
-const sections = [
-  ["overview", "Overview"],
-  ["location", "Location"],
-  ["media", "Photos"],
-  ["highlights", "Measurements"],
-  ["rooms", "Rooms"],
-  ["amenities", "Amenities"],
-  ["landmarks", "Landmarks"],
-  ["pricing", "Pricing"],
-  ["description", "Description"],
-  ["review", "Review"],
-];
+const steps = ["details", "photos", "preview", "publish"];
 
 export default function PropertyForm({ property, user }) {
   const methods = useForm({
@@ -53,7 +49,23 @@ export default function PropertyForm({ property, user }) {
   } = methods;
   const mutation = usePropertyMutation("save");
   const navigate = useNavigate();
+  const location = useLocation();
+  const [params, setParams] = useSearchParams();
+  const requestedStep =
+    params.get("step") ||
+    (location.pathname.endsWith("/preview") ? "preview" : "details");
+  const step = steps.includes(requestedStep) ? requestedStep : "details";
+  const stepIndex = steps.indexOf(step);
+  function goToStep(next) {
+    if (uploading || mutation.isPending) return;
+    setNotice("");
+    const nextParams = new URLSearchParams(params);
+    nextParams.set("step", next);
+    setParams(nextParams);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
   const allowLeave = useRef(false);
+  const formRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [notice, setNotice] = useState("");
   const [discard, setDiscard] = useState(false);
@@ -73,6 +85,7 @@ export default function PropertyForm({ property, user }) {
   });
 
   async function save(data, status) {
+    if (mutation.isPending) return;
     if (uploading) {
       setNotice("Wait for the photos to finish processing.");
       return;
@@ -92,13 +105,16 @@ export default function PropertyForm({ property, user }) {
         { replace: true },
       );
     } catch (error) {
-      for (const [field, message] of Object.entries(error.fields || {}))
-        setError(field, { message });
+      const fields = Object.entries(error.fields || {});
+      for (const [field, message] of fields) setError(field, { message });
+      if (fields.length) showInvalidStep(fields[0][0].split(".")[0]);
     }
   }
   function focusFirstError() {
     requestAnimationFrame(() => {
-      const field = document.querySelector('[aria-invalid="true"]');
+      const field = Array.from(
+        formRef.current?.querySelectorAll('[aria-invalid="true"]') || [],
+      ).find((element) => !element.closest("[hidden]"));
       field?.closest("section")?.scrollIntoView({ block: "start" });
       field?.focus({ preventScroll: true });
     });
@@ -113,16 +129,31 @@ export default function PropertyForm({ property, user }) {
       setNotice(
         "Fix the highlighted values before saving your draft. Required publishing fields may remain empty.",
       );
-      focusFirstError();
+      showInvalidStep(result.error.issues[0]?.path[0]);
       return;
     }
     save(result.data, "draft");
   }
-  function invalid() {
+  function showInvalidStep(field) {
+    const next =
+      field === "images" || field === "videoUrl"
+        ? "photos"
+        : field === "policy"
+          ? "publish"
+          : "details";
+    const nextParams = new URLSearchParams(params);
+    nextParams.set("step", next);
+    setParams(nextParams);
+    setTimeout(focusFirstError, 0);
+  }
+  function invalid(errors) {
     setNotice(
-      "Some details need attention. Check the highlighted fields below.",
+      "Some details need attention. Check the highlighted fields before publishing.",
     );
-    focusFirstError();
+    const result = publishSchema.safeParse(getValues());
+    showInvalidStep(
+      result.success ? Object.keys(errors)[0] : result.error.issues[0]?.path[0],
+    );
   }
   function leave() {
     allowLeave.current = true;
@@ -134,87 +165,145 @@ export default function PropertyForm({ property, user }) {
       <title>
         {property ? "Edit property" : "List a property"} | Ghar Realty
       </title>
-      <div className="mb-8">
-        <p className="mb-3 text-xs uppercase tracking-widest text-muted">
-          Your property / {property ? "Edit listing" : "New listing"}
-        </p>
-        <h1 className="text-4xl font-semibold tracking-tight">
-          {property ? "Refine your listing." : "Make room for a new beginning."}
-        </h1>
-        <p className="mt-4 text-sm leading-6 text-muted">
-          One page, all the details. Fields marked * are required to publish.
-          Save a draft whenever you need a break.
-        </p>
-      </div>
-      <nav aria-label="Listing sections" className="mb-8 flex flex-wrap gap-2">
-        {sections.map(([id, label]) => (
-          <a
-            key={id}
-            href={`#${id}`}
-            className="border border-border px-3 py-2 text-xs hover:bg-surface"
+      <nav
+        aria-label="Listing steps"
+        className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4"
+      >
+        {steps.map((item, index) => (
+          <button
+            key={item}
+            type="button"
+            aria-current={step === item ? "step" : undefined}
+            disabled={uploading || mutation.isPending}
+            onClick={() => goToStep(item)}
+            className={`min-h-12 rounded-sm border border-border px-3 py-3 text-sm capitalize disabled:opacity-50 ${step === item ? "bg-action text-on-action" : "bg-background hover:bg-surface"}`}
           >
-            {label}
-          </a>
+            {index + 1}. {item[0].toUpperCase() + item.slice(1)}
+          </button>
         ))}
       </nav>
       <form
+        ref={formRef}
         noValidate
-        onSubmit={(event) =>
-          handleSubmit((data) => save(data, "published"), invalid)(event)
-        }
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (step === "publish")
+            handleSubmit((data) => save(data, "published"), invalid)(event);
+        }}
       >
         <fieldset disabled={mutation.isPending} className="min-w-0">
           <Feedback error={notice} />
-          <OverviewSection />
-          <LocationSection />
-          <MediaSection onBusyChange={setUploading} />
-          <HighlightsSection />
-          <AmenitiesSection />
-          <LandmarksSection />
-          <PricingSection />
-          <DescriptionSection />
-          <FormSection id="review" number="10" title="Review your listing">
-            <div className="grid gap-4 border border-border bg-surface p-5 sm:grid-cols-2">
-              <div>
-                <p className="text-xs text-muted">Property</p>
-                <p className="mt-2 font-medium">
-                  {values.title || "Untitled draft"}
-                </p>
-                <p className="mt-2 text-sm text-muted">
-                  {values.location.area || "Area not set"},{" "}
-                  {values.location.city || "City not set"}
+          <Feedback error={mutation.error} />
+          <div hidden={step !== "details"}>
+            <p className="mb-5 text-sm text-muted">
+              Tell buyers and renters what makes your property special. Required
+              fields are marked *.
+            </p>
+            <OverviewSection />
+            <LocationSection />
+            <HighlightsSection />
+            <AmenitiesSection />
+            <LandmarksSection />
+            <PricingSection />
+            <DescriptionSection />
+          </div>
+          <div hidden={step !== "photos"}>
+            <MediaSection onBusyChange={setUploading} />
+          </div>
+          {step === "preview" && (
+            <>
+              <ListingPreview values={values} />
+              <Button
+                variant="secondary"
+                className="mb-6"
+                onClick={() => goToStep("details")}
+              >
+                Edit details
+              </Button>
+            </>
+          )}
+          {step === "publish" && (
+            <FormSection
+              id="publish"
+              title={
+                property?.status === "published"
+                  ? "Publish your updates"
+                  : "Publish your property"
+              }
+              description="Review the final checks. Your property becomes visible to everyone after publishing."
+            >
+              <div className="border border-border bg-surface p-6">
+                <h3 className="text-xl font-semibold">
+                  {values.title || "Untitled property"}
+                </h3>
+                <p className="mt-3 text-sm text-muted">
+                  {values.images.length} photos · Listing duration: 180 days
                 </p>
               </div>
-              <div>
-                <p className="font-semibold">{formatPrice(values)}</p>
-                <p className="mt-2 text-sm text-muted">
-                  {values.images.length} photos ·{" "}
-                  {measuredArea(values).area || 0}{" "}
-                  {measuredArea(values).areaUnit}
-                </p>
-              </div>
-            </div>
-            <Feedback error={mutation.error} />
-            <div className="flex flex-wrap gap-3">
+              <Checkbox
+                label={
+                  <>
+                    I agree to the{" "}
+                    <Link to="/terms" target="_blank" className="underline">
+                      listing policy
+                    </Link>
+                  </>
+                }
+                error={methods.formState.errors.policy?.message}
+                {...methods.register("policy")}
+              />
+              <p className="text-sm text-muted">
+                Your contact number will appear on the listing so interested
+                people can reach you.
+              </p>
               <Button
                 type="submit"
                 loading={mutation.isPending}
                 disabled={uploading}
               >
-                Save & publish
+                {property?.status === "published"
+                  ? "Publish changes"
+                  : "Publish property"}
               </Button>
+            </FormSection>
+          )}
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {stepIndex > 0 && (
               <Button
                 variant="secondary"
-                onClick={saveDraft}
-                disabled={uploading || mutation.isPending}
+                disabled={uploading}
+                onClick={() => goToStep(steps[stepIndex - 1])}
               >
-                Save as draft
+                ← Back to {steps[stepIndex - 1]}
               </Button>
-              <Button variant="ghost" onClick={() => setDiscard(true)}>
-                Discard changes
+            )}
+            {stepIndex < 3 && (
+              <Button
+                disabled={uploading}
+                onClick={() => goToStep(steps[stepIndex + 1])}
+              >
+                {step === "details"
+                  ? "Continue to photos →"
+                  : step === "photos"
+                    ? "Preview property →"
+                    : "Continue to publish →"}
               </Button>
-            </div>
-          </FormSection>
+            )}
+            <Button
+              variant="secondary"
+              onClick={saveDraft}
+              disabled={uploading || mutation.isPending}
+            >
+              Save as draft
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setDiscard(true)}
+              disabled={uploading}
+            >
+              Discard changes
+            </Button>
+          </div>
         </fieldset>
       </form>
       <Modal

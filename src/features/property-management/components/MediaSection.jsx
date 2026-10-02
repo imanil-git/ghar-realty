@@ -37,6 +37,10 @@ export default function MediaSection({ onBusyChange }) {
     const failures = [];
     for (const file of selected) {
       try {
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type))
+          throw new Error("Choose a JPG, PNG or WebP photo.");
+        if (file.size > 10 * 1024 * 1024)
+          throw new Error("Each photo must be 10 MB or smaller.");
         const result = await uploadImage(file);
         next.push(result.url);
       } catch (error) {
@@ -58,9 +62,9 @@ export default function MediaSection({ onBusyChange }) {
   return (
     <FormSection
       id="media"
-      number="03"
-      title="Photos & video"
-      description="Put your strongest photo first. It becomes the cover of your listing."
+
+      title="Property photos"
+      description="Add up to 12 photos. Use JPG, PNG or WebP, up to 10 MB each."
     >
       <div
         onDragOver={(e) => e.preventDefault()}
@@ -68,12 +72,10 @@ export default function MediaSection({ onBusyChange }) {
           e.preventDefault();
           upload(e.dataTransfer.files);
         }}
-        className="border border-dashed border-control-border bg-surface p-8 text-center"
+        className="bg-surface px-8 py-12 text-center"
       >
         <Upload className="mx-auto mb-4" size={28} strokeWidth={1.3} />
-        <p className="mb-4 text-sm">
-          Drag photos here, or choose them from your device.
-        </p>
+        <p className="mb-4 text-sm">Drag your photos here</p>
         <Button
           variant="secondary"
           disabled={busy}
@@ -86,7 +88,7 @@ export default function MediaSection({ onBusyChange }) {
           ref={inputRef}
           aria-label="Property photos"
           type="file"
-          accept="image/jpeg,image/png,image/gif,image/bmp,image/webp"
+          accept="image/jpeg,image/png,image/webp"
           multiple
           className="sr-only"
           tabIndex={-1}
@@ -96,7 +98,7 @@ export default function MediaSection({ onBusyChange }) {
           }}
         />
         <p className="mt-4 text-xs leading-5 text-muted">
-          JPG, PNG, GIF, BMP, WebP · Up to 20 MB each
+          JPG, PNG, WebP · Up to 10 MB each
           <br />
           Minimum 600 × 400 pixels · Maximum 12 photos
         </p>
@@ -128,18 +130,15 @@ export default function MediaSection({ onBusyChange }) {
       {!images.length && (
         <p className="text-sm text-muted">No photos added yet.</p>
       )}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-3">
         {images.map((src, index) => (
-          <div
-            key={src.slice(-30) + index}
-            className="min-w-0 border border-border"
-          >
+          <div key={src.slice(-30) + index} className="min-w-0">
             <img
               src={src}
               alt={`Listing photo ${index + 1}`}
-              className="aspect-[4/3] w-full object-cover"
+              className="aspect-[320/204] w-full object-cover"
             />
-            <div className="p-2">
+            <div className="inline-flex items-center gap-1 p-2">
               <button
                 type="button"
                 disabled={busy || index === 0}
@@ -148,7 +147,7 @@ export default function MediaSection({ onBusyChange }) {
                 }
                 className="min-h-10 text-xs disabled:font-semibold"
               >
-                {index === 0 ? "Cover photo" : "Make cover"}
+                {index === 0 ? "Cover photo" : "Set as cover"}
               </button>
               <div className="flex flex-wrap gap-1">
                 <button
@@ -174,9 +173,10 @@ export default function MediaSection({ onBusyChange }) {
                   aria-label={`Remove photo ${index + 1}`}
                   disabled={busy}
                   onClick={() => update(images.filter((_, i) => i !== index))}
-                  className="p-2"
+                  className="inline-flex items-center gap-1 p-2"
                 >
-                  <X size={16} />
+                  <X size={14} />
+                  <span className="text-xs">Remove</span>
                 </button>
               </div>
             </div>

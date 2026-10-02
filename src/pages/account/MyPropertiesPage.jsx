@@ -10,8 +10,8 @@ import Select from "../../components/ui/Select";
 import Button from "../../components/ui/Button";
 import Modal from "../../components/ui/Modal";
 import Feedback from "../../components/ui/Feedback";
-import Pagination from "../../components/ui/Pagination";
 import { categories, categoryLabel } from "../../utils/constants";
+import PropertyImage from "../../features/properties/components/PropertyImage";
 import { formatPrice } from "../../utils/formatPrice";
 
 export default function MyPropertiesPage() {
@@ -30,12 +30,15 @@ export default function MyPropertiesPage() {
   function actions(property) {
     return (
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <Link to={`/properties/${property.id}`} className="py-2 underline">
+        <Link
+          to={`/account/properties/${property.id}/preview`}
+          className="py-2 hover:underline"
+        >
           View
         </Link>
         <Link
           to={`/account/properties/${property.id}/edit`}
-          className="py-2 underline"
+          className="py-2 hover:underline"
         >
           Edit
         </Link>
@@ -54,50 +57,40 @@ export default function MyPropertiesPage() {
   return (
     <section>
       <title>My properties | Ghar Realty</title>
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold">My properties</h1>
-        <Link
-          to="/account/properties/new"
-          className="inline-flex min-h-12 items-center bg-action px-5 text-sm text-on-action"
-        >
-          + List a property
-        </Link>
-      </div>
-      <div className="my-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-8 grid items-end gap-4 sm:grid-cols-2 xl:grid-cols-[1.7fr_1fr_1.1fr_auto]">
         <Input
           label="Search listings"
+          placeholder="Search by title or location"
           value={params.get("q") || ""}
           onChange={(e) => change("q", e.target.value)}
         />
+        <Select
+          label="Status"
+          value={params.get("status") || ""}
+          onChange={(e) => change("status", e.target.value)}
+        >
+          <option value="">All statuses</option>
+          <option value="published">Published</option>
+          <option value="draft">Draft</option>
+        </Select>
         <Select
           label="Category"
           value={params.get("category") || ""}
           onChange={(e) => change("category", e.target.value)}
         >
-          <option value="">All</option>
+          <option value="">All categories</option>
           {categories.map((c) => (
             <option key={c} value={c}>
               {categoryLabel(c)}
             </option>
           ))}
         </Select>
-        <Select
-          label="Status"
-          value={params.get("status") || ""}
-          onChange={(e) => change("status", e.target.value)}
+        <Link
+          to="/account/properties/new"
+          className="inline-flex min-h-12 items-center justify-center rounded-sm bg-action px-6 text-sm text-on-action"
         >
-          <option value="">All</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </Select>
-        <Select
-          label="Sort"
-          value={params.get("sort") || "latest"}
-          onChange={(e) => change("sort", e.target.value)}
-        >
-          <option value="latest">Latest</option>
-          <option value="price">Price low to high</option>
-        </Select>
+          + Add property
+        </Link>
       </div>
       <QueryState query={query}>
         {(items) => {
@@ -105,7 +98,8 @@ export default function MyPropertiesPage() {
             .filter(
               (p) =>
                 (!params.get("q") ||
-                  p.title
+                  [p.title, p.location.area, p.location.city]
+                    .join(" ")
                     .toLowerCase()
                     .includes(params.get("q").toLowerCase())) &&
                 (!params.get("category") ||
@@ -130,11 +124,14 @@ export default function MyPropertiesPage() {
                 <>
                   <div className="hidden overflow-x-auto lg:block">
                     <table className="w-full text-left text-sm">
-                      <thead className="border-b border-border text-muted">
+                      <thead className="bg-surface text-muted">
                         <tr>
-                          {["Property", "Price", "Status", "Actions"].map(
+                          {["Property", "Status", "Price", "Actions"].map(
                             (label) => (
-                              <th key={label} className="py-4 pr-4 font-normal">
+                              <th
+                                key={label}
+                                className="p-4 font-normal uppercase text-xs"
+                              >
                                 {label}
                               </th>
                             ),
@@ -144,16 +141,33 @@ export default function MyPropertiesPage() {
                       <tbody>
                         {rows.map((p) => (
                           <tr key={p.id} className="border-b border-border">
-                            <td className="max-w-64 py-5 pr-4">
-                              <p className="truncate font-medium">
-                                {p.title || "Untitled draft"}
-                              </p>
-                              <p className="mt-2 text-xs text-muted">
-                                {p.location.city || "Location not set"}
-                              </p>
+                            <td className="py-4 pr-4 pl-4">
+                              <div className="flex items-center gap-4">
+                                <div className="h-20 w-26 shrink-0 overflow-hidden bg-surface">
+                                  <PropertyImage
+                                    src={p.images?.[0]}
+                                    alt={p.title || "Property"}
+                                  />
+                                </div>
+                                <div>
+                                  <p className="font-medium">
+                                    {p.title || "Untitled draft"}
+                                  </p>
+                                  <p className="mt-2 text-xs text-muted">
+                                    Updated{" "}
+                                    {new Date(
+                                      p.updatedAt || p.createdAt,
+                                    ).toLocaleDateString("en-GB", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })}
+                                  </p>
+                                </div>
+                              </div>
                             </td>
-                            <td className="pr-4">{formatPrice(p)}</td>
                             <td className="pr-4 capitalize">{p.status}</td>
+                            <td className="pr-4">{formatPrice(p)}</td>
                             <td>{actions(p)}</td>
                           </tr>
                         ))}
@@ -176,15 +190,34 @@ export default function MyPropertiesPage() {
                   </div>
                 </>
               )}
-              <Pagination
-                page={page}
-                pages={Math.ceil(filtered.length / 6)}
-                onChange={(value) => {
-                  const next = new URLSearchParams(params);
-                  next.set("page", value);
-                  setParams(next);
-                }}
-              />
+              <p className="mt-6 text-xs text-muted">
+                {filtered.length
+                  ? `Showing ${(page - 1) * 6 + 1}–${Math.min(page * 6, filtered.length)} of ${filtered.length} listings`
+                  : "No listings"}
+              </p>
+              <nav aria-label="Listing pagination" className="mt-4 flex gap-4">
+                {[
+                  [-1, "Previous"],
+                  [1, "Next"],
+                ].map(([offset, label]) => (
+                  <Button
+                    key={label}
+                    variant="secondary"
+                    disabled={
+                      offset < 0
+                        ? page <= 1
+                        : page >= Math.ceil(filtered.length / 6)
+                    }
+                    onClick={() => {
+                      const next = new URLSearchParams(params);
+                      next.set("page", page + offset);
+                      setParams(next);
+                    }}
+                  >
+                    {label}
+                  </Button>
+                ))}
+              </nav>
             </>
           );
         }}

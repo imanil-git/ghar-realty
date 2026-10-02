@@ -76,10 +76,13 @@ test("save draft, edit without losing data, publish and delete", async ({
 }) => {
   await login(page);
   await page.goto("/account/properties/new");
-  await page.getByRole("button", { name: "Save & publish" }).click();
+  await page.getByRole("button", { name: "4. Publish" }).click();
+  await page
+    .getByRole("button", { name: "Publish property", exact: true })
+    .click();
   await expect(
     page.getByText(
-      "Some details need attention. Check the highlighted fields below.",
+      "Some details need attention. Check the highlighted fields before publishing.",
     ),
   ).toBeVisible();
   await page.getByLabel(/^Property title/).fill("E2E quiet home");
@@ -102,7 +105,9 @@ test("save draft, edit without losing data, publish and delete", async ({
   await page
     .getByRole("textbox", { name: "Description", exact: true })
     .fill("A spacious home with natural light and a private garden.");
+  await page.getByRole("button", { name: "4. Publish" }).click();
   await page.getByRole("checkbox", { name: /I agree to the/ }).check();
+  await page.getByRole("button", { name: "2. Photos" }).click();
   await page
     .getByLabel(/^Property photos/)
     .setInputFiles("public/images/hero.jpg");
@@ -112,7 +117,10 @@ test("save draft, edit without losing data, publish and delete", async ({
     page.getByRole("dialog", { name: "Leave without saving?" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Keep editing" }).click();
-  await page.getByRole("button", { name: "Save & publish" }).click();
+  await page.getByRole("button", { name: "4. Publish" }).click();
+  await page
+    .getByRole("button", { name: "Publish property", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/properties\/[^/]+$/);
   await expect(
     page.getByRole("heading", { name: "E2E quiet home" }),
@@ -151,7 +159,9 @@ test("land listing supports traditional measurements and price on call", async (
   await page
     .getByRole("textbox", { name: "Description", exact: true })
     .fill("A quiet plot with road access and a view of the hills.");
+  await page.getByRole("button", { name: "4. Publish" }).click();
   await page.getByRole("checkbox", { name: /I agree to the/ }).check();
+  await page.getByRole("button", { name: "2. Photos" }).click();
   await page
     .getByLabel("Property photos")
     .setInputFiles("public/images/hero.jpg");
@@ -164,7 +174,10 @@ test("land listing supports traditional measurements and price on call", async (
       ),
     ).toBe(true);
   }
-  await page.getByRole("button", { name: "Save & publish" }).click();
+  await page.getByRole("button", { name: "4. Publish" }).click();
+  await page
+    .getByRole("button", { name: "Publish property", exact: true })
+    .click();
   await expect(
     page.getByRole("heading", { name: "E2E hillside land" }),
   ).toBeVisible();

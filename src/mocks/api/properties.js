@@ -16,7 +16,10 @@ export const mockProperties = {
       filters,
     );
     const page = Math.max(1, Number(filters.page) || 1);
-    const limit = 6;
+    const limit = Math.min(
+      24,
+      Math.max(1, Math.floor(Number(filters.pageSize) || 6)),
+    );
     return {
       items: items.slice((page - 1) * limit, page * limit),
       total: items.length,

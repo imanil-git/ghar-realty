@@ -11,13 +11,20 @@ export default function FavoritesPage() {
   return (
     <section>
       <title>Saved homes | Ghar Realty</title>
-      <h1 className="mb-8 text-3xl font-semibold">Saved homes</h1>
+      <p className="mb-8 text-sm text-muted">
+        The places you can picture calling home.
+      </p>
       <QueryState query={favorites}>
         {(items) =>
           items.length ? (
             <div className="grid gap-7 sm:grid-cols-2 xl:grid-cols-3">
               {items.map((p) => (
-                <PropertyCard key={p.id} property={p} variant="compact" />
+                <PropertyCard
+                  key={p.id}
+                  property={p}
+                  variant="editorial"
+                  imageClassName="aspect-[416/264]"
+                />
               ))}
             </div>
           ) : (

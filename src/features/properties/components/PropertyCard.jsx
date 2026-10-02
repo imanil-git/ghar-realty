@@ -5,7 +5,57 @@ import { categoryLabel } from "../../../utils/constants";
 import FavoriteButton from "../../favorites/components/FavoriteButton";
 import PropertyImage from "./PropertyImage";
 
-export default function PropertyCard({ property, variant = "vertical" }) {
+export default function PropertyCard({
+  property,
+  variant = "vertical",
+  imageClassName = "",
+}) {
+  if (variant === "editorial" || variant === "editorial-list") {
+    const list = variant === "editorial-list";
+    const price =
+      !property.priceOnCall &&
+      property.listingType === "buy" &&
+      property.price >= 10000000
+        ? `NPR ${(property.price / 10000000).toFixed(2)} Cr`
+        : formatPrice(property);
+    return (
+      <article
+        className={`min-w-0 ${list ? "grid items-center gap-5 sm:grid-cols-2" : ""}`}
+      >
+        <Link
+          to={`/properties/${property.id}`}
+          aria-label={`View ${property.title}`}
+          className={`block overflow-hidden bg-surface ${imageClassName || "aspect-[1.88]"}`}
+        >
+          <PropertyImage src={property.images[0]} alt={property.title} />
+        </Link>
+        <div className={list ? "" : "pt-2"}>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xl font-semibold">
+              {price}
+              {priceSuffix(property)}
+            </p>
+            <FavoriteButton propertyId={property.id} />
+          </div>
+          <Link
+            to={`/properties/${property.id}`}
+            className="block text-sm font-medium hover:underline"
+          >
+            {property.title}
+          </Link>
+          <p className="mt-2 text-sm text-muted">
+            {property.location.area}, {property.location.city}
+          </p>
+          <p className="mt-2 text-xs text-muted">
+            {property.category !== "land" &&
+              `${property.bedrooms} beds · ${property.bathrooms} baths · `}
+            {new Intl.NumberFormat("en").format(property.area)}{" "}
+            {property.areaUnit === "sqft" ? "sq. ft." : property.areaUnit}
+          </p>
+        </div>
+      </article>
+    );
+  }
   const horizontal = variant === "horizontal";
   return (
     <article
