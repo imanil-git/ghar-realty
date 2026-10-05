@@ -1,0 +1,7 @@
+.home-page .form-control {
+  min-height: 40px;
+  padding-block: 8px;
+}
+.dark .home-design-icon {
+  filter: invert(1);
+}

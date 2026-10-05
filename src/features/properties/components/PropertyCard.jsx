@@ -10,7 +10,8 @@ export default function PropertyCard({
   variant = "vertical",
   imageClassName = "",
 }) {
-  if (variant === "editorial" || variant === "editorial-list") {
+  if (["home", "editorial", "editorial-list"].includes(variant)) {
+    const home = variant === "home";
     const list = variant === "editorial-list";
     const price =
       !property.priceOnCall &&
@@ -29,17 +30,27 @@ export default function PropertyCard({
         >
           <PropertyImage src={property.images[0]} alt={property.title} />
         </Link>
-        <div className={list ? "" : "pt-2"}>
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xl font-semibold">
+        <div className={list ? "" : home ? "pt-4" : "pt-2"}>
+          <div
+            className={`flex items-center justify-between gap-2 ${home ? "relative min-h-[30px] pr-10" : ""}`}
+          >
+            <p
+              className={
+                home
+                  ? "text-[22px] font-semibold leading-[30px]"
+                  : "text-xl font-semibold"
+              }
+            >
               {price}
               {priceSuffix(property)}
             </p>
-            <FavoriteButton propertyId={property.id} />
+            <div className={home ? "absolute -right-3 -top-2" : ""}>
+              <FavoriteButton propertyId={property.id} />
+            </div>
           </div>
           <Link
             to={`/properties/${property.id}`}
-            className="block text-sm font-medium hover:underline"
+            className={`block text-sm font-medium leading-5 hover:underline ${home ? "mt-2" : ""}`}
           >
             {property.title}
           </Link>
