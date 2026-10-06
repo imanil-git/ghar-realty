@@ -100,6 +100,7 @@ export default function HomePage() {
     <>
       <title>Ghar Realty — Find your perfect home</title>
       <Container className="home-page property-detail grid grid-cols-1 gap-12 pb-16 pt-12">
+        {/* Heading Section */}
         <section className="grid min-w-0 grid-cols-1 items-end gap-8 lg:grid-cols-[minmax(0,780fr)_minmax(0,484fr)] lg:gap-12">
           <h1 className="text-[clamp(2rem,6.12vw,5.5rem)] font-bold leading-[1.045] tracking-normal">
             FIND YOUR
@@ -125,6 +126,8 @@ export default function HomePage() {
           fetchPriority="high"
           className="aspect-[4/3] w-full object-cover sm:aspect-[1312/560]"
         />
+
+        {/* Fill Up the form for Popular Destinations. */}
         <section
           aria-label="Quick property filters"
           className="grid gap-6 sm:grid-cols-3"
@@ -166,6 +169,8 @@ export default function HomePage() {
             ))}
           </Select>
         </section>
+
+        {/* Category */}
         <section className="grid gap-8 lg:gap-12">
           <SectionHeading
             caption="Explore categories"
@@ -199,12 +204,15 @@ export default function HomePage() {
             )}
           </QueryState>
         </section>
+
+        {/* Property Card */}
         <PropertySection
           title="Worth a closer look."
           caption="Featured properties"
           query={featured}
           to="/properties"
         />
+        {/* Budget Range */}
         <section className="bg-surface p-6 sm:p-8">
           <h2 className="text-[28px] font-semibold leading-tight sm:text-[32px] sm:leading-10">
             Your budget. More possibilities.
@@ -227,6 +235,8 @@ export default function HomePage() {
             </Link>
           </div>
         </section>
+
+        {/* Recent Added Property */}
         <PropertySection
           title="New in your neighborhood."
           caption="Just listed"

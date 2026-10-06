@@ -2,7 +2,8 @@ export const primaryLinks = [
   { to: "/properties?listingType=buy", label: "Buy" },
   { to: "/properties?listingType=rent", label: "Rent" },
   { to: "/properties", label: "Explore properties" },
-  { to: "/about-us", label: "About us" },
+  { to: "/about-us", label: "About-Us" },
+  { to: "/contact-us", label: "Contact-Us" },
 ];
 
 export const accountLinks = [
