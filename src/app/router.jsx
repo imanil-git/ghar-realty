@@ -16,7 +16,12 @@ const PropertiesPage = lazy(() => import("../pages/properties/PropertiesPage"));
 const PropertyDetailsPage = lazy(
   () => import("../pages/properties/PropertyDetailsPage"),
 );
-const AuthPage = lazy(() => import("../pages/auth/AuthPage"));
+const LoginPage = lazy(() => import("../pages/auth/LoginPage"));
+const SignupPage = lazy(() => import("../pages/auth/SignupPage"));
+const ForgotPasswordPage = lazy(
+  () => import("../pages/auth/ForgotPasswordPage"),
+);
+const ResetPasswordPage = lazy(() => import("../pages/auth/ResetPasswordPage"));
 const ProfilePage = lazy(() => import("../pages/account/ProfilePage"));
 const ChangePasswordPage = lazy(
   () => import("../pages/account/ChangePasswordPage"),
@@ -59,15 +64,15 @@ const router = createBrowserRouter([
           { path: "properties", element: <PropertiesPage /> },
           { path: "categories/:category", element: <PropertiesPage /> },
           { path: "properties/:id", element: <PropertyDetailsPage /> },
-          { path: "login", element: <AuthPage key="login" mode="login" /> },
-          { path: "signup", element: <AuthPage key="signup" mode="signup" /> },
+          { path: "login", element: <LoginPage /> },
+          { path: "signup", element: <SignupPage /> },
           {
             path: "forgot-password",
-            element: <AuthPage key="forgot" mode="forgot" />,
+            element: <ForgotPasswordPage />,
           },
           {
             path: "reset-password",
-            element: <AuthPage key="reset" mode="reset" />,
+            element: <ResetPasswordPage />,
           },
           { path: "terms", element: <TermsPage /> },
           { path: "about-us", element: <AboutPage /> },
